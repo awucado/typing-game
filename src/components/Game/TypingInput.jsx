@@ -1,16 +1,36 @@
-import clsx from 'clsx';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { BsCursorFill } from 'react-icons/bs';
-import { BsFlagFill } from 'react-icons/bs';
-import useTyping from 'react-typing-game-hook';
+import clsx from "clsx";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { BsCursorFill } from "react-icons/bs";
+import { BsFlagFill } from "react-icons/bs";
 
+import Tooltip from "@/components/Tooltip";
 
-import Tooltip from '@/components/Tooltip';
-
-import { usePreferenceContext } from '@/context/Preference/PreferenceContext';
+import { usePreferenceContext } from "@/context/Preference/PreferenceContext";
 
 const TypingInput = React.forwardRef(
-  ({ text, time }, ref) => {
+  (
+    {
+      text,
+      time,
+      resetTyping,
+      deleteTyping,
+      insertTyping,
+      states: {
+        startTime,
+        endTime,
+        chars,
+        charsState,
+        length,
+        currIndex,
+        currChar,
+        correctChar,
+        errorChar,
+        phase,
+      },
+      endTyping,
+    },
+    ref
+  ) => {
     const [duration, setDuration] = useState(() => 0);
     const [isFocused, setIsFocused] = useState(() => false);
     const letterElements = useRef(null);
@@ -20,22 +40,8 @@ const TypingInput = React.forwardRef(
       preferences: { isOpen, zenMode, type },
     } = usePreferenceContext();
 
-    const {
-      states: {
-        chars,
-        charsState,
-        currIndex,
-        phase,
-        correctChar,
-        errorChar,
-        startTime,
-        endTime,
-      },
-      actions: { insertTyping, deleteTyping, resetTyping, endTyping },
-    } = useTyping(text, { skipCurrentWordOnSpace: false, pauseOnError: true });
-
     const [margin, setMargin] = useState(() => 0);
-    const [value, setValue] = useState(() => '');
+    const [value, setValue] = useState(() => "");
 
     // set cursor
     const pos = useMemo(() => {
@@ -61,7 +67,7 @@ const TypingInput = React.forwardRef(
     }, [currIndex]);
 
     useEffect(() => {
-      setValue('');
+      setValue("");
       setMargin(0);
       setTimeLeft(parseInt(time));
       endTyping();
@@ -95,8 +101,6 @@ const TypingInput = React.forwardRef(
       if (phase === 2 && endTime && startTime) {
         const dur = Math.floor((endTime - startTime) / 1000);
         setDuration(dur);
-
-
       } else {
         setDuration(0);
       }
@@ -105,56 +109,55 @@ const TypingInput = React.forwardRef(
 
     //handle key presses
     const handleKeyDown = (letter, control) => {
-      console.log(chars, currIndex, chars.charAt(currIndex +1))
-      if (letter === 'Backspace') {
-        const spanref = letterElements?.current?.children[currIndex];
-        const top = spanref?.offsetTop - 2;
+      console.log(chars, currIndex, chars.charAt(currIndex + 1));
+      // if (letter === "Backspace") {
+      //   const spanref = letterElements?.current?.children[currIndex];
+      //   const top = spanref?.offsetTop - 2;
 
-        if (top < 0) {
-          return;
-        }
-        deleteTyping(control);
-      } else if (letter.length === 1) {
-        if (chars.charAt(currIndex+1) == letter) {
-          let i = currIndex +1
-          do {
-            insertTyping(chars.charAt(i));
-            i++
-          } while (chars.charAt(i) !== " ")
-          insertTyping(" ")
-        }
-       
+      //   if (top < 0) {
+      //     return;
+      //   }
+      //   deleteTyping(control);
+      // } else if (letter.length === 1) {
+      if (chars.charAt(currIndex + 1) == letter) {
+        let i = currIndex + 1;
+        do {
+          insertTyping(chars.charAt(i));
+          i++;
+        } while (chars.charAt(i) !== " ");
+        insertTyping(" ");
       }
+      // }
     };
 
     return (
-      <div className='relative w-full max-w-[950px]'>
+      <div className="relative w-full max-w-[950px]">
         {zenMode && (
           <div
             className={clsx(
-              'pointer-events-none fixed inset-0 z-30 h-screen w-screen bg-bg transition-opacity duration-200',
-              { 'opacity-0': !isFocused }
+              "pointer-events-none fixed inset-0 z-30 h-screen w-screen bg-bg transition-opacity duration-200",
+              { "opacity-0": !isFocused }
             )}
           ></div>
         )}
-        <span className='absolute left-0 -top-[3.25rem] z-40 text-4xl text-fg/80'>
+        <span className="absolute left-0 -top-[3.25rem] z-40 text-4xl text-fg/80">
           {timeLeft}
         </span>
 
         <div
           className={clsx(
-            'relative z-40 h-[140px] w-full text-2xl outline-none'
+            "relative z-40 h-[140px] w-full text-2xl outline-none"
           )}
           onClick={() => {
-            if (ref != null && typeof ref !== 'function') {
+            if (ref != null && typeof ref !== "function") {
               ref?.current?.focus();
             }
             setIsFocused(true);
           }}
         >
           <input
-            type='text'
-            className='absolute left-0 top-0 z-20 h-full w-full cursor-default opacity-0'
+            type="text"
+            className="absolute left-0 top-0 z-20 h-full w-full cursor-default opacity-0"
             tabIndex={1}
             ref={ref}
             onFocus={() => setIsFocused(true)}
@@ -163,7 +166,7 @@ const TypingInput = React.forwardRef(
             onChange={(e) => {
               setValue((prev) => {
                 if (prev.length > e.target.value.length) {
-                  handleKeyDown('Backspace', false);
+                  handleKeyDown("Backspace", false);
                 } else {
                   handleKeyDown(e.target.value.slice(-1), false);
                 }
@@ -177,7 +180,7 @@ const TypingInput = React.forwardRef(
               }
               if (e.ctrlKey) return;
               if (
-                ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(
+                ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(
                   e.key
                 )
               )
@@ -186,30 +189,30 @@ const TypingInput = React.forwardRef(
           />
           <div
             className={clsx(
-              'absolute -top-4 z-10 h-4 w-full bg-gradient-to-b from-bg transition-all duration-200',
-              { 'opacity-0': !isFocused }
+              "absolute -top-4 z-10 h-4 w-full bg-gradient-to-b from-bg transition-all duration-200",
+              { "opacity-0": !isFocused }
             )}
           ></div>
           <div
             className={clsx(
-              'absolute -bottom-1 z-10 h-8 w-full bg-gradient-to-t from-bg transition-all duration-200',
-              { 'opacity-0': !isFocused }
+              "absolute -bottom-1 z-10 h-8 w-full bg-gradient-to-t from-bg transition-all duration-200",
+              { "opacity-0": !isFocused }
             )}
           ></div>
           <span
             className={clsx(
-              'absolute z-20 flex h-full w-full cursor-default items-center justify-center text-base opacity-0 transition-all duration-200',
-              { 'text-fg opacity-100 ': !isFocused }
+              "absolute z-20 flex h-full w-full cursor-default items-center justify-center text-base opacity-0 transition-all duration-200",
+              { "text-fg opacity-100 ": !isFocused }
             )}
           >
             Click
-            <BsCursorFill className='mx-2 scale-x-[-1]' />
+            <BsCursorFill className="mx-2 scale-x-[-1]" />
             or press any key to focus
           </span>
           <div
             className={clsx(
-              'absolute top-0 left-0 mb-4 h-full w-full overflow-hidden text-justify leading-relaxed tracking-wide transition-all duration-200',
-              { 'opacity-40 blur-[8px]': !isFocused }
+              "absolute top-0 left-0 mb-4 h-full w-full overflow-hidden text-justify leading-relaxed tracking-wide transition-all duration-200",
+              { "opacity-40 blur-[8px]": !isFocused }
             )}
           >
             <div
@@ -224,21 +227,21 @@ const TypingInput = React.forwardRef(
                     }
               }
             >
-              {text.split('').map((letter, index) => {
+              {text.split("").map((letter, index) => {
                 const state = charsState[index];
                 const color =
                   state === 0
-                    ? 'text-font'
+                    ? "text-font"
                     : state === 1
-                    ? 'text-fg'
-                    : 'text-hl border-b-2 border-hl';
+                    ? "text-fg"
+                    : "text-hl border-b-2 border-hl";
                 return (
                   <span
                     key={letter + index}
                     className={`${color} ${
                       state === 0 &&
                       index < currIndex &&
-                      'border-b-2 border-hl text-hl'
+                      "border-b-2 border-hl text-hl"
                     }`}
                   >
                     {letter}
@@ -253,50 +256,50 @@ const TypingInput = React.forwardRef(
                 left: pos.top < 0 ? -2 : pos.left,
                 top: pos.top < 0 ? 2 : pos.top + 2,
               }}
-              className={clsx('caret text-hl', {
-                '-mt-[2px]': currIndex === -1,
-                'animate-blink': phase === 0,
+              className={clsx("caret text-hl", {
+                "-mt-[2px]": currIndex === -1,
+                "animate-blink": phase === 0,
               })}
             >
               {phase === 2 ? (
-                <div className='group relative z-40'>
+                <div className="group relative z-40">
                   <Tooltip
-                    className='bg-fg text-bg group-hover:translate-y-0 group-hover:opacity-100'
-                    triangle='bg-fg'
+                    className="bg-fg text-bg group-hover:translate-y-0 group-hover:opacity-100"
+                    triangle="bg-fg"
                   >
                     You finished here.
                   </Tooltip>
-                  <BsFlagFill className='-mb-[8px] text-fg' />
+                  <BsFlagFill className="-mb-[8px] text-fg" />
                 </div>
               ) : (
-                '|'
+                "|"
               )}
             </span>
           ) : null}
         </div>
-        <div className='relative z-40 mt-4 flex w-full flex-col flex-wrap items-center justify-center gap-4 text-sm'>
+        <div className="relative z-40 mt-4 flex w-full flex-col flex-wrap items-center justify-center gap-4 text-sm">
           {phase === 2 && startTime && endTime ? (
-            <div className='grid grid-rows-3 items-center gap-4 rounded-lg px-4 py-1 text-xl font-bold sm:flex'>
-              <span className='text-4xl'>
+            <div className="grid grid-rows-3 items-center gap-4 rounded-lg px-4 py-1 text-xl font-bold sm:flex">
+              <span className="text-4xl">
                 {Math.round(((60 / duration) * correctChar) / 5)}
-                <span className='text-base'>WPM</span>
-              </span>{' '}
-              <span className='text-4xl'>
+                <span className="text-base">WPM</span>
+              </span>{" "}
+              <span className="text-4xl">
                 {duration}
-                <span className='text-2xl'>s</span>
+                <span className="text-2xl">s</span>
               </span>
-              <span className='relative text-4xl'>
+              <span className="relative text-4xl">
                 {(((correctChar - errorChar) / (currIndex + 1)) * 100).toFixed(
                   2
                 )}
                 %
-                <span className='absolute -bottom-4 right-1 text-sm'>
+                <span className="absolute -bottom-4 right-1 text-sm">
                   ACCURACY
                 </span>
               </span>
             </div>
           ) : null}
-          <div className='flex gap-4'></div>
+          <div className="flex gap-4"></div>
         </div>
       </div>
     );
