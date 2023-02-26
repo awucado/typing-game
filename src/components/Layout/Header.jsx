@@ -13,9 +13,6 @@ import {
 import { RiTeamFill } from "react-icons/ri";
 import { TbKeyboard } from "react-icons/tb";
 
-
-import Tooltip from "@/components/Tooltip";
-
 import { usePreferenceContext } from "@/context/Preference/PreferenceContext";
 
 const typeList = ["words", "sentences", "numbers"];
