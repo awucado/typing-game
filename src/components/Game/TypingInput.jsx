@@ -40,7 +40,6 @@ const TypingInput = React.forwardRef(
     // set cursor
     const pos = useMemo(() => {
       if (currIndex !== -1 && letterElements.current) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const spanref = letterElements.current.children[currIndex];
 
         const left = spanref.offsetLeft + spanref.offsetWidth - 2;
@@ -108,7 +107,6 @@ const TypingInput = React.forwardRef(
     const handleKeyDown = (letter, control) => {
       console.log(chars, currIndex, chars.charAt(currIndex +1))
       if (letter === 'Backspace') {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const spanref = letterElements?.current?.children[currIndex];
         const top = spanref?.offsetTop - 2;
 
